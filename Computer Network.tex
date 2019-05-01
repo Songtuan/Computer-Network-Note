@@ -104,6 +104,8 @@ Indeed, we can give the messages that flowing within this Network a name: \texti
 \end{center}
 In which, the most two important field: Destination Address and Source Address, have been introduced in the previous part.
 
+\subsection{Wireless Connection}
+
 The most content we discussed in these two sections is based on the wired connection, or we can say, use physical line as media in Physical Layer. However, in recent years, the wireless connection become more and more popular. By using wireless connection, one device can communicate with the other without using physical line. Indeed, this wireless connection technology is not as fancy as many people think. In wireless network, the devices use wireless connection connect to a \textit{base station} and this base station will connect to the normal wired network topology as described before. So, an example wireless network is:
 \begin{figure}[ht]
 	\center
@@ -168,29 +170,55 @@ The Network Topology described in above section is usually called \textit{Local 
 	\item The large number of Switched are required so that them can connect all the devices, which will cause the Network Topology become missive and raise a lot of problems such as \textit{Broadcasting Storm}.
 	\item The large of number of long wire is required to connect the devices that cross long distance, which increases the cost significantly. 
 \end{enumerate}
-In order to address these problem, we first consider that the function provided by Data-Link Layer already guarantees the messages can be successfully delivered within LAN. Therefore, we can separate this big massive Network into different LANs and build a new mechanism that can deliver message from one LAN to the other, which means, we can build a new Layer that control how message will be transferred from one LAN to the other upon he original Data-Link Layer by using the functions(services) provided by Data-Link Layer. In more generally, what we are doing is think each LAN as a single device and build a mechanism to transfer message between them, as illustrated in Figure
+In order to address these problem, we first consider that the function provided by Data-Link Layer already guarantees the messages can be successfully delivered within LAN. Therefore, we can separate this big massive Network into different LANs and build a new mechanism that can deliver message from one LAN to the other, which means, we can build a new Layer that control how message will be transferred from one LAN to the other upon he original Data-Link Layer by using the functions(services) provided by Data-Link Layer. In more generally, what we are doing is think each LAN as a single device and build a mechanism to transfer message between them, as illustrated in Figure \ref{network_layer}.
 \begin{figure}[ht]
+	\center
 	\begin{tikzpicture}
-		\node[label=center: LAN 1] (LAN_1) at (-3, 1){\includegraphics[scale=0.3]{cloud}};
-		\node[label=center: LAN 2] (LAN_2) at (-3, -1){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 1] (LAN_1) at (-4, 2){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 2] (LAN_2) at (-4, -2){\includegraphics[scale=0.3]{cloud}};
 		\node[label=left: Router 1] (router_1) at (-2, 0){\includegraphics[scale=0.3]{router}};
 		\node[label=below: Router 2] (router_2) at (2, 0){\includegraphics[scale=0.3]{router}};
 		\node[label=right: Router 3] (router_3) at (0, 2){\includegraphics[scale=0.3]{router}};
-		\node[label=center: LAN 3] (LAN_3) at (0, 3){\includegraphics[scale=0.3]{cloud}};
-		\node[label=center: LAN 4] (LAN_4) at (3, 0){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 3] (LAN_3) at (0, 4){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 4] (LAN_4) at (5, 0){\includegraphics[scale=0.3]{cloud}};
 		
 		\draw[blue, thick] (LAN_1) -- (router_1);
-		\draw[blue, thick] (LAN_2) -- (router_2);
+		\draw[blue, thick] (LAN_2) -- (router_1);
 		\draw[blue, thick] (router_1) -- (router_2);
-		\draw[blue, thick] (router_2) -- (LAN_3);
+		\draw[blue, thick] (router_3) -- (LAN_3);
 		\draw[blue, thick] (router_2) -- (router_3);
 		\draw[blue, thick] (router_1) -- (router_3);
-		\draw[blue, thick] (router_3) -- (LAN_4);
+		\draw[blue, thick] (router_2) -- (LAN_4);
 	\end{tikzpicture}
+	\caption{Illustration of Network Layer Topology}
+	\label{network_layer}
 \end{figure}
+As what we have done in LAN, we still need a device to connect each LAN. This device, in term of Network Layer, is called \textit{Router}. The Router which directly to a LAN is called this LANs' \textit{Gateway Router} as this Router is the gate that allow this LAN to communicate with the other LANs. As usual, the first thing to do to build a successful message delivering mechanism is to locate each LAN, or generally speaking, to find the address of each LAN. This bring us the concept of \textit{IP address} and \textit{Sub-net Mask}.
 
+\subsection{IP Address and Sub-net Mask}
+IP address is the address of device in term of Network Layer. IP address is coded under base 2 and using 32 bits, \textsl{e.g.}:
+\begin{equation*}
+	x_{1} x_{2} x_{3} \cdots x_{32}
+\end{equation*}
+Where each $x_{i} \in \{ 0, 1 \}$. Usually, the IP address is divided into 4 group each contain 8 bits:
+\begin{equation*}
+	x_{1} x_{2} \cdots x_{8} \quad x_{9} x_{10} \cdots x_{16} \quad x_{17} x_{18} \cdots x_{24} \quad x_{25} x_{26} \cdots x_{32}
+\end{equation*}
+And transfer each 8-bit binary number to 10-base number, we then get out familiar format IP address: $x.x.x.x$. Particularly, when we assign IP address to device, the devices within the same LAN \textit{must} have the same prefix. \textsl{e.g.} the first 24 bits of IP addresses for each device within LAN 1 must be the same. A example may help better illustrate this idea: If the IP address for device A in this LAN is 192.168.1.1, then, the IP address for device B must be something like $192.168.1.x$ where $1 < x < 255$ as the first 24 bits, corresponding to $192.168.1$, must be the same for all devices within this LAN. Indeed, we usually use \textit{Sub-net Mask} to indicate the length of prefix for each LAN. The sub-net mask is also a 32-bit binary number, if a LAN has a $x$-bit prefix, then, the first $x$ bits of its' sub-net mask will be set to 1 and the rest $32-x$ bits will be set to zero. For example, a LAN has a prefix length equal to 20 bits, then, its' sub-net mask is:
+\begin{equation*}
+	\underbrace{111 \cdots 11}_{20 \, bits}\underbrace{000 \cdots 00}_{12 \, bits}
+\end{equation*}
+We can also divide the 32-bit sub-net mask into 4 groups each contain 8 bits and then, turn each group into 10-base number, \textsl{e.g.} a sub-net mask that indicate 24-bit length prefix can be written as $255.255.255.0$ under this transformation.
 
+Indeed, by combining the devices' IP address along with the prefix-length of the LAN this device belong to, we have the form $x.x.x.x/y$, the term $x.x.x.x$ indicate the device's IP address and $y$ indicate the prefix length. We notice that the form $x.x.x.x/y$ not only specific the devices' IP address, but indicate which LAN it belong to. By inspiration of this, we notice that each LAN can be identified by its' prefix. For example, for a LAN, the device within this LAN has the IP address $192.168.1.x/24$, which means, for each device within this LAN, the first 24 bits of their IP address, which is $192.168.1$ must be the same. On the other word, the prefix of this LAN is $192.168.1$. therefore, we can use this first 24 bits prefix as the address of LAN and set the rest bits to zero. As a result, the address of this LAN is $192.168.1.0/24$. The term $/24$ cannot be omitted as it may cause some mistakes in some cases. For example $192.168.1.128/25$ denote the address for a LAN as the first 25 bits is the prefix. However, it can become a legal IP address within a LAN $192.168.1.0/24$.
 
+\subsection{Message Delivering}
+After we have identified the address of LAN, we can start to build the mechanism for message delivering. Since the topology of Network Layer is far more complicated than LAN topology (it usually has a lot of Routers), the mechanism similar to ARP protocol can not be used in here. Instead, in Network Protocol, we explicitly calculate the route for message delivering. The protocols that target for this task include OSPF, RIP, etc.
+
+\subsection{Revision of Message Delivering within LAN}
+Recall the ARP protocol used in Data-Link Layer. In the beginning, the message sender A will send a ARP request that ask: What is the MAC Address of B. In here, B is actually identified by its' IP address, let's assume B's IP is 192.168.1.10/24, then, what ARP Request message actually ask is: What is the MAC Address of 192.168.1.10/24. After A get the ARP Response, A will record the B's IP along with it's MAC address into a ARP table. Then, when A want to send some further message, it can get B's MAC address directly from the ARP table.
+
+The above situation happened when A, B are in the same LAN, what if A, B are in different LAN? In the beginning, A will notice B is in a different LAN as their prefix is different. Hence, A will deliver this message to B's LAN through Network Layer. When this message reach LAN B's Gateway Router, this router will deliver the message to B through Data-Link Layer, which means, bu using ARP protocol.
 
 
 

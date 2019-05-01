@@ -36,7 +36,7 @@ Furthermore, based on the characteristics of the media, it can be categorized in
 	\item \textbf{Duplex}: This type of media can transport message with both direction during a transportation, \textsl{e.g.} transport message from A to B and B to A in the same time.
 \end{enumerate}
 Indeed, the Figure \ref{physical_layer} give us an inspiration about how to construct a simple network, which is connecting each devices within network with a media. For example. assume we want to construct a Network contain four devices, the easiest way to do this is shown in Figure \ref{topology_basic}, in which, each device is connected with the rest.
-\begin{figure}[H]
+\begin{figure}[ht]
 	\center
 	\includegraphics[scale=0.5]{Topology}
 	\caption{Basic Topology}
@@ -46,7 +46,7 @@ However, the problem of this topology is that the number of medias will grow exp
 
 \section{Data-Link Layer}
 The solution of the problem remaining in last section is straightforward: By adding one or more \textit{Switch} which depend on the number of devices within network. The Switches work as bridges that connect different devices in Network, as illustrated in Figure \ref{topo}:
-\begin{figure}[H]
+\begin{figure}[ht]
 \center
 \subfloat[]{\begin{tikzpicture}
 	\node[label=below:Device] (laptop_1) at (6, 3){\includegraphics[scale = 0.3]{laptop}};
@@ -92,15 +92,102 @@ Even though the switches reduce the number of connection, the new problem is how
 \end{center}
 into the table if the query message come through port 5 of Switch A. This table is called \textit{ARP table}. By maintain such a table, when Switch A receive a message which has Device A's MAC address as destination, it can directly forward this message to Device A through port 5 by searching Device A's MAC address along with the corresponding port within ARP table. After Switch A broadcast the query, Switch B and Device B will both receive this query message. Device B will realize that Device A did not ask its' MAC address and will simply discard this query message without further action. By contrast, Switch B will keep this broadcasting which finally cause Device D receive this query. One thing that need to be noticed is that Switch B will also record Device A's MAC address and the corresponding port index into ARP table by reading the source MAC address within query message. When Device D receive this query, it will response Device A with a respond message which use Device A's MAC address as destination address, its' own MAC address as source address and carry its' MAC address as query result. This respond message will be transferred back to Device A through Switched with the Device D's MAC address(source address) be recorded into each Switch's ARP table. After Device A receive the MAC address of Device D, it can then send the further message by setting Device D's MAC address as destination address. The Switch can also know which port should be used to send these messages by searching the ARP table to find Device D's MAC address. 
 
-It can be seen from the above procedure, in order to perform message delivering within this Network topology. The messages must have some specific content, \textsl{e.g.} source address and destination address, or without loss generality, we can say, the messages that being transferred under this mechanism must have s specific format. This message delivering mechanism with specific message format is called \textit{protocol} and the message delivering mechanism within the Network topology described above is called \textit{ARP Protocol}.
+It can be seen from the above procedure, in order to perform message delivering within this Network topology. The messages must have some specific content, \textsl{e.g.} source address and destination address, or without loss generality, we can say, the messages that being transferred under this mechanism must have s specific format. This message delivering mechanism with specific message format is called \textit{protocol} and the message delivering mechanism within the Network topology described above is called \textit{ARP Protocol}. 
 
- 
+Indeed, we can give the messages that flowing within this Network a name: \textit{Ethernet Frame}. According to above discussion, we know that Ethernet Frame must follow a specific format. The exact Ethernet Frame format is:
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		Preamble & Destination Address & Source Address & Type & Actual Message Content & CRC code \\
+		\hline
+	\end{tabular}
+\end{center}
+In which, the most two important field: Destination Address and Source Address, have been introduced in the previous part.
 
+The most content we discussed in these two sections is based on the wired connection, or we can say, use physical line as media in Physical Layer. However, in recent years, the wireless connection become more and more popular. By using wireless connection, one device can communicate with the other without using physical line. Indeed, this wireless connection technology is not as fancy as many people think. In wireless network, the devices use wireless connection connect to a \textit{base station} and this base station will connect to the normal wired network topology as described before. So, an example wireless network is:
+\begin{figure}[ht]
+	\center
+	\begin{tikzpicture}
+		\node[label=right: Device A] (laptop_A) at (-2, 2){\includegraphics[scale=0.3]{laptop}};
+		\node[label=right: Device B] (laptop_B) at (-2, -2){\includegraphics[scale=0.3]{laptop}};
+		\node[label=below: Base Station] (base_station) at (0, 0){\includegraphics[scale=0.3]{accesspoint}};
+		\node[label=below: Switch] (switch) at (2, 0){\includegraphics[scale=0.3]{switch}};
+		\node[label=center: Network Topology as Figure \ref{topo_2}] (cloud) at (6, 0){\includegraphics[scale=0.9]{cloud}};
+		
+		\draw[blue, dashed, thick] (laptop_A) -- (base_station);
+		\draw[blue, dashed, thick] (laptop_B) -- (base_station);
+		\draw[blue, thick] (base_station) -- (switch);
+		\draw[blue, thick] (switch) -- (cloud);
+	\end{tikzpicture}
+	\caption{Wireless Network Topology}
+	\label{wireless}
+\end{figure}
+In which, the dashed line between Device A, B and Base Station denote the wireless connection. The name of base station and the function it provide may varied depend on what wireless communication protocol it is used. Particularly, in \textit{802.11 protocol}, which is the protocol we will focus on, the base station is given name: \textit{access point} or \textit{AP}. Furthermore, since wireless connection is more unstable than wired connection, the majority wireless protocols, include 802.11, require message receiver to send a acknowledgment back to message sender so that the sender can know this message has been successfully received. Before we move to more detail of 802.11 protocol, there is one more problem that we need to realized: In Figure \ref{wireless}, even though we only draw the wireless connection between Devices and Base Station, the message sent or received by one device will indeed being received by all the others, which means, the message sent by one device will be broadcast to all the other device that connect to the same base station. Hence, the equivalent topology of wireless connection can be illustrated as Figure \ref{equivalent}, which indicated these devices are actually sharing a communication line.
+\begin{figure}[ht]
+	\center
+	\begin{tikzpicture}
+		\node[label=right: Device A] (laptop_A) at (0, 2){\includegraphics[scale=0.3]{laptop}};
+		\node[label=below: Device B] (laptop_B) at (2, -2){\includegraphics[scale=0.3]{laptop}};
+		\node[label=below: Base Station] (base_station) at (5, 0){\includegraphics[scale=0.3]{accesspoint}};
+		\draw[blue, thick] (-1, 0) -- (base_station);
+		\draw[blue, thick] (laptop_A) -- (0, 0);
+		\draw[blue, thick] (laptop_B) -- (2, 0);
+	\end{tikzpicture}
+	\caption{Equivalent Wireless Connection}
+	\label{equivalent}
+\end{figure}
+The problem of this connection is straightforward: When there are more than one device are sending messages through this line, these messages will have collision with each other, and hence cause the messages be corrupted. The solution of this problem is a protocol called \textit{CSMA/CA} stand for \textit{Carrier Sense Multiple Access with Collision Avoid}. The CSMA/CA protocol work as follow: When a device have a message to be sent, it will:
+\begin{enumerate}
+	\item Check whether the line is idle(no message is currently transferring on it). If the line is idle, the device will start to transfer message after a fixed small period of time known as \textit{Distributed Inter-frame Space}(DIFS).
+	\item If the line is not idle, the device will choose a random delay time and set up a timer to count down this value. One thing that need to be noticed here is the timer only start to count down when the device senses the line is idle, which means, the timer will freeze if there are messages being transferred through the line. 
+	\item When the timer count down to zero, the device will start to transfer the message and wait to receive the acknowledgement.
+	\item If the acknowledgement is received, the device know this message has been received. Otherwise, device will go back to step 2 and choose a delay time to prepare to re-transmit this message.
+\end{enumerate} 
+The reason for using DIFS is that: There will always be a transmission delay between Device A and Device B which caused by the distance between A and B. Hence, when Device A start to transfer a message, Device B will sense the line is idle until the message reach the location of B. Hence, if B start to transfer message at this time period(the time that the message hasn't reach B but the line is actually not idle), the collision will happen. The DIFS is designed to try to avoid this time period and hence, further decrease the probability that collision happen.
 
+After we have described some fundamental mechanism of wireless connection, we can now start to discuss some detail about 802.11 protocol. The most important question is: How the device connect to AP(base station). In order to connect to a AP, the first thing a device need to do is to figure out which AP it will connect to, or in more generally, device need to know the identification of each AP so that it can choose which one to connect to. In 802.11, each AP is identified by a \textit{Service Set Identifier}(SSID) and will be used by device as its' identification. Even though the SSID provide a method that allow device to know the identification of each AP, device still need to know the list of APs(identified by SSID) that it can connect to and then establish the connection, 802.11 provide two mechanisms to achieve this goal:
+\begin{description}
+	\item[Passive Scanning]: The procedure of passive scanning is:
+	\begin{enumerate}
+		\item Each AP will broadcast a \textit{Beacon Frame} which inform the devices within this area with its' SSID and told them it is willing to be connected.
+		\item Each device will receive multiple Beacon Frame and hence get a list of APs it can connect to. The device will select one of them and send a \textit{Request Frame} to request establishing a connection with this AP.
+		\item The chosen AP will respond with a \textit{Response Frame} to confirm the connection is established.
+	\end{enumerate}
+	\item[Active Scanning]: The procedure of active scanning is:
+	\begin{enumerate}
+		\item Each device will broadcast a \textit{Prob Request Frame} to each AP to request APs' SSID.
+		\item When AP receive this Prob Request Frame, it will respond with a \textit{Probe Response Frame} which indicate its' SSID.
+		\item The device will get a list of available APs by receiving multiple Probe Response Frame. The device will choose one AP and send a Request Frame to request establishing connection.
+		\item The chosen AP will respond with a Response Frame to confirm the connection is established.
+	\end{enumerate}
+\end{description}
 
-
-
-
+\section{Network Layer}
+The Network Topology described in above section is usually called \textit{Local Area Network}(LAN). LAN is actually a successful Network that can allow different devices communicate with other. However, the problem raise with the increasing number of devices, especially when some part of devices may have very long distance with the others. The topology of LAN is definitely not suitable for this large scale Network for the reasons:
+\begin{enumerate}
+	\item The large number of Switched are required so that them can connect all the devices, which will cause the Network Topology become missive and raise a lot of problems such as \textit{Broadcasting Storm}.
+	\item The large of number of long wire is required to connect the devices that cross long distance, which increases the cost significantly. 
+\end{enumerate}
+In order to address these problem, we first consider that the function provided by Data-Link Layer already guarantees the messages can be successfully delivered within LAN. Therefore, we can separate this big massive Network into different LANs and build a new mechanism that can deliver message from one LAN to the other, which means, we can build a new Layer that control how message will be transferred from one LAN to the other upon he original Data-Link Layer by using the functions(services) provided by Data-Link Layer. In more generally, what we are doing is think each LAN as a single device and build a mechanism to transfer message between them, as illustrated in Figure
+\begin{figure}[ht]
+	\begin{tikzpicture}
+		\node[label=center: LAN 1] (LAN_1) at (-3, 1){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 2] (LAN_2) at (-3, -1){\includegraphics[scale=0.3]{cloud}};
+		\node[label=left: Router 1] (router_1) at (-2, 0){\includegraphics[scale=0.3]{router}};
+		\node[label=below: Router 2] (router_2) at (2, 0){\includegraphics[scale=0.3]{router}};
+		\node[label=right: Router 3] (router_3) at (0, 2){\includegraphics[scale=0.3]{router}};
+		\node[label=center: LAN 3] (LAN_3) at (0, 3){\includegraphics[scale=0.3]{cloud}};
+		\node[label=center: LAN 4] (LAN_4) at (3, 0){\includegraphics[scale=0.3]{cloud}};
+		
+		\draw[blue, thick] (LAN_1) -- (router_1);
+		\draw[blue, thick] (LAN_2) -- (router_2);
+		\draw[blue, thick] (router_1) -- (router_2);
+		\draw[blue, thick] (router_2) -- (LAN_3);
+		\draw[blue, thick] (router_2) -- (router_3);
+		\draw[blue, thick] (router_1) -- (router_3);
+		\draw[blue, thick] (router_3) -- (LAN_4);
+	\end{tikzpicture}
+\end{figure}
 
 
 
